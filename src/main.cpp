@@ -3,6 +3,7 @@
 #include "rolling_average.h"
 #include "util.h"
 #include "tach.h"
+#include "pid.h"
 
 #define REV_SWITCH_PIN 12
 
@@ -13,13 +14,15 @@
 #define TACH_B_PIN 999 // TODO
 #define EDGES_PER_REVOLUTION 2
 
-#define WHEEL_A_PIN 9
-#define WHEEL_B_PIN 10 // TODO
+#define WHEEL_A_PIN 11
+#define WHEEL_B_PIN 9
 
 #define ADC_RESOLUTION 12
 #define PWM_RESOLUTION 12
 
 Tachometer wheel_a_tach(EDGES_PER_REVOLUTION);
+PIDController wheel_a_pid(0.0006, 0.0000000001, 0.001);
+
 void tach_a_interrupt() {
     wheel_a_tach.handle_interrupt();
 }
@@ -30,20 +33,19 @@ double battery_voltage() {
 }
 
 void set_wheel_a_voltage(double volts) {
-    int duty_cycle = double_map(volts, 0.0, battery_voltage(), 0.0, 4096);
-    Serial.print("Setting wheel a duty cycle: ");
-    Serial.print(duty_cycle);
-    Serial.print(", ");
-    analogWrite(WHEEL_A_PIN, 4096 - duty_cycle);
+    int duty_cycle = double_map(volts, 0.0, battery_voltage(), 0.0, 255);
+    analogWrite(WHEEL_A_PIN, 255 - duty_cycle);
 }
 
 void setup() {
-    // put your setup code here, to run once:
     pinMode(REV_SWITCH_PIN, INPUT_PULLDOWN);
     pinMode(TACH_A_PIN, INPUT_PULLUP);
 
+    pinMode(WHEEL_A_PIN, OUTPUT);
+    pinMode(WHEEL_B_PIN, OUTPUT);
+
     analogReadResolution(ADC_RESOLUTION);
-    analogWriteResolution(PWM_RESOLUTION);
+    // analogWriteResolution(PWM_RESOLUTION);
 
     Serial.begin(9600);
 
@@ -52,19 +54,29 @@ void setup() {
 }
 
 void loop() {
+    wheel_a_tach.update();
+
     Serial.print("RPM: ");
     Serial.print(wheel_a_tach.get_rpm());
+    Serial.print(", Wheel a pid: ");
+    Serial.print(wheel_a_pid.get());
     Serial.print(", Voltage: ");
     Serial.println(battery_voltage());
 
     if(digitalRead(REV_SWITCH_PIN)) {
         // analogWrite(WHEEL_A_PIN, 255);
-        set_wheel_a_voltage(2);
-        analogWrite(WHEEL_B_PIN, 4096);
+        wheel_a_pid.set(20000);
+        wheel_a_pid.update((double) wheel_a_tach.get_rpm());
+        set_wheel_a_voltage(constrain(wheel_a_pid.get(), 0, 12));
+        // analogWrite(WHEEL_A_PIN, 255 - 255);
+        // analogWrite(WHEEL_B_PIN, 255 - 255);
     }
     else {
-        analogWrite(WHEEL_A_PIN, 4096);
+        wheel_a_pid.reset();
+        analogWrite(WHEEL_A_PIN, 255);
         // set_wheel_a_voltage(0);
-        analogWrite(WHEEL_B_PIN, 4096);
+        analogWrite(WHEEL_B_PIN, 255);
     }
+
+    delay(5);
 }

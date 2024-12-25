@@ -15,7 +15,7 @@ class Tachometer {
             this->edges_per_revolution = edges_per_revolution;
             time_of_last_interrupt = 0;
 
-            this->filter = RollingAverage<uint32_t, 4>();
+            this->filter = RollingAverage<uint32_t, 2>();
         }
 
         void handle_interrupt() {
@@ -23,12 +23,24 @@ class Tachometer {
             unsigned long elapsed_micros = micros() - time_of_last_interrupt;
             time_of_last_interrupt = current_time;
 
-            this->rpm = (1 / (double) elapsed_micros) *
+            double new_rpm = (1 / (double) elapsed_micros) *
                         (1.0 / (double) this->edges_per_revolution) *
                         (60000000); // 60000000 is the number of microseconds in a minute
 
-            filter.update(this->rpm);
+            if (abs(new_rpm - this->rpm) > 20000) {
+                return;
+            }
+
+            filter.update(new_rpm);
             this->rpm = filter.get_average();
+        }
+
+        void update() {
+            unsigned long elapsed_micros = micros() - time_of_last_interrupt;
+
+            if (elapsed_micros > 500000) {
+                this->rpm = 0;
+            }
         }
 
         uint32_t get_rpm() {
@@ -39,7 +51,7 @@ class Tachometer {
         unsigned long time_of_last_interrupt;
         uint32_t edges_per_revolution;
         uint32_t rpm;
-        RollingAverage<uint32_t, 4> filter;
+        RollingAverage<uint32_t, 2> filter;
 };
 
 #endif
