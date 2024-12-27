@@ -4,6 +4,7 @@
 #include "util.h"
 #include "tach.h"
 #include "pid.h"
+#include "feedforward.h"
 
 #define REV_SWITCH_PIN 12
 
@@ -34,7 +35,7 @@ double battery_voltage() {
 
 void set_wheel_a_voltage(double volts) {
     int duty_cycle = double_map(volts, 0.0, battery_voltage(), 0.0, 255);
-    analogWrite(WHEEL_A_PIN, 255 - duty_cycle);
+    analogWrite(WHEEL_A_PIN, constrain(255 - duty_cycle, 0, 255));
 }
 
 void setup() {
@@ -51,6 +52,12 @@ void setup() {
 
     // Setup tachometers
     attachInterrupt(digitalPinToInterrupt(TACH_A_PIN), tach_a_interrupt, CHANGE);
+
+    double kS, kV;
+    analogWrite(WHEEL_B_PIN, 255);
+    tune_ff(&wheel_a_tach, set_wheel_a_voltage, 9, &kS, &kV);
+    analogWrite(WHEEL_A_PIN, 255);
+    while(!digitalRead(REV_SWITCH_PIN));
 }
 
 void loop() {
@@ -65,7 +72,7 @@ void loop() {
 
     if(digitalRead(REV_SWITCH_PIN)) {
         // analogWrite(WHEEL_A_PIN, 255);
-        wheel_a_pid.set(20000);
+        wheel_a_pid.set(40000);
         wheel_a_pid.update((double) wheel_a_tach.get_rpm());
         set_wheel_a_voltage(constrain(wheel_a_pid.get(), 0, 12));
         // analogWrite(WHEEL_A_PIN, 255 - 255);

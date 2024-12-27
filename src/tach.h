@@ -19,18 +19,22 @@ class Tachometer {
         }
 
         void handle_interrupt() {
+            // Compute the time since the last interrupt
             unsigned long current_time = micros();
             unsigned long elapsed_micros = micros() - time_of_last_interrupt;
             time_of_last_interrupt = current_time;
 
+            // Convert microseconds per edge to revolutions per minute
             double new_rpm = (1 / (double) elapsed_micros) *
                         (1.0 / (double) this->edges_per_revolution) *
                         (60000000); // 60000000 is the number of microseconds in a minute
 
-            if (abs(new_rpm - this->rpm) > 20000) {
+            // Ignore the new reading if the difference from the last one is absurdly large
+            if (abs(new_rpm - this->rpm) > 50000) {
                 return;
             }
 
+            // Update the rolling average filter
             filter.update(new_rpm);
             this->rpm = filter.get_average();
         }
@@ -38,6 +42,7 @@ class Tachometer {
         void update() {
             unsigned long elapsed_micros = micros() - time_of_last_interrupt;
 
+            // If no edge has been detected for more than half a second, set the rpm to zero
             if (elapsed_micros > 500000) {
                 this->rpm = 0;
             }

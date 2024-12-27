@@ -5,27 +5,27 @@
 
 template <class T, int N>
 class RollingAverage {
-  public:
-    RollingAverage() {
-      this->current_index = 0;
-    }
+    public:
+        RollingAverage() {
+            this->current_index = 0;
+        }
 
-    void update(T new_value) {
-      this->buffer[current_index] = new_value;
-      current_index = (current_index + 1) % N;
-    }
+        void update(T new_value) {
+            this->buffer[current_index] = new_value;
+            current_index = (current_index + 1) % N;
+        }
 
-    T get_average() {
-      T sum = 0;
-      for (int i = 0; i < N; i++) {
-        sum += this->buffer[i];
-      }
-      return sum / N;
-    }
+        T get_average() {
+            T sum = 0;
+            for (int i = 0; i < N; i++) {
+                sum += this->buffer[i];
+            }
+            return sum / N;
+        }
 
-  private:
-    T buffer[N] = {0};
-    uint32_t current_index = 0;
+    private:
+        T buffer[N] = {0};
+        uint32_t current_index = 0;
 };
 
 #endif
