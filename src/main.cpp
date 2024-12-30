@@ -11,11 +11,11 @@
 
 Tachometer wheel_a_tach(EDGES_PER_REVOLUTION);
 PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
-Wheel wheel_a(wheel_a_tach, wheel_a_pid, WHEEL_A_PIN, true);
+Wheel wheel_a(wheel_a_tach, wheel_a_pid, WHEEL_A_PIN, 12.0, true);
 
 Tachometer wheel_b_tach(EDGES_PER_REVOLUTION);
 PIDController wheel_b_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
-Wheel wheel_b(wheel_b_tach, wheel_b_pid, WHEEL_B_PIN, true);
+Wheel wheel_b(wheel_b_tach, wheel_b_pid, WHEEL_B_PIN, 12.0, true);
 
 void tach_a_interrupt() {
     wheel_a.tach.handle_interrupt();
@@ -38,10 +38,6 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(TACH_A_PIN), tach_a_interrupt, CHANGE);
     // attachInterrupt(digitalPinToInterrupt(TACH_B_PIN), tach_b_interrupt, CHANGE);
 
-    // Tachometer wheel_a_tach(EDGES_PER_REVOLUTION);
-    // PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
-    // Wheel wheel_a(wheel_a_tach, wheel_a_pid, WHEEL_A_PIN, true);
-
     // double kS, kV;
     // analogWrite(WHEEL_B_PIN, 255);
     // if (digitalRead(REV_SWITCH_PIN)) {
@@ -60,19 +56,12 @@ void loop() {
     Serial.println(battery_voltage());
 
     if(digitalRead(REV_SWITCH_PIN)) {
-        // wheel_a_pid.set(10000);
-        // wheel_a_pid.update((double) wheel_a_tach.get_rpm());
-        // set_wheel_a_voltage(constrain(wheel_a_pid.get(), 0, 12));
         wheel_a.set_rpm(10000);
-        // wheel_a.set_voltage(4);
         wheel_b.set_voltage(0);
     }
     else {
         wheel_a.set_voltage(0);
         wheel_b.set_voltage(0);
-        // wheel_a_pid.reset();
-        // analogWrite(WHEEL_A_PIN, 255);
-        // analogWrite(WHEEL_B_PIN, 255);
     }
 
     wheel_a.update();

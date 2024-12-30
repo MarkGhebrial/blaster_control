@@ -20,12 +20,13 @@ class Wheel {
     public:
         Wheel() {}
 
-        Wheel(Tachometer tach, PIDController pid, uint32_t mosfet_pin, bool inverted = false) {
+        Wheel(Tachometer tach, PIDController pid, uint32_t mosfet_pin, double max_voltage = 12, bool inverted = false) {
             this->tach = tach;
             this->pid = pid;
 
             this->mosfet_pin = mosfet_pin;
             this->inverted = inverted;
+            this->max_voltage = max_voltage;
 
             pinMode(mosfet_pin, OUTPUT);
         }
@@ -56,7 +57,10 @@ class Wheel {
         }
 
         void set_rpm(uint32_t rpm) {
-            this->mode = WheelMode::PID_MODE;
+            if (this->mode != WheelMode::PID_MODE) {
+                this->pid.reset();
+                this->mode = WheelMode::PID_MODE;
+            }
 
             this->pid.set(rpm);
         }
@@ -74,8 +78,7 @@ class Wheel {
 
             switch (this->mode) {
                 case WheelMode::PID_MODE:
-                    Serial.println("UPDATING PID CONTROLLER");
-                    this->pid.update(tach.get_rpm());
+                    this->pid.update((double) tach.get_rpm());
                     target_voltage = pid.get();
                 case WheelMode::VOLTAGE_MODE:
                     this->set_voltage_dont_change_state(this->target_voltage);
@@ -91,15 +94,17 @@ class Wheel {
 
     private:
         void set_pwm_dont_change_state(uint32_t pwm) {
+            pwm = constrain(pwm, 0, 255);
             analogWrite(this->mosfet_pin, this->inverted ? 255 - pwm : pwm);
         }
         void set_voltage_dont_change_state(double voltage) {
-            int pwm = double_map(voltage, 0.0, battery_voltage(), 0.0, 255);
+            uint32_t pwm = double_map(constrain(voltage, 0.0, this->max_voltage), 0.0, battery_voltage(), 0.0, 255);
             this->set_pwm_dont_change_state(pwm);
         }
 
         uint32_t mosfet_pin;
         bool inverted;
+        double max_voltage = 12.0;
 
         double target_voltage;
         WheelMode mode = WheelMode::PWM_MODE;
