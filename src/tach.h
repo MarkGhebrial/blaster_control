@@ -11,6 +11,12 @@
 
 class Tachometer {
     public:
+        Tachometer() {}
+
+        Tachometer(const Tachometer& t) {
+            *this = t;
+        }
+
         Tachometer(uint32_t edges_per_revolution) {
             this->edges_per_revolution = edges_per_revolution;
             time_of_last_interrupt = 0;

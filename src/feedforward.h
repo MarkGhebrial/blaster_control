@@ -15,13 +15,13 @@ void tune_ff(Tachometer *tach, void (*set_voltage)(double), double max_voltage, 
     for (int i = 1; i <= VOLTAGE_STEPS; i++) {
         double voltage = (max_voltage / VOLTAGE_STEPS) * i;
 
-        RollingAverage<int32_t, 20> roc_average = RollingAverage<int32_t, 20>();
+        RollingAverage<int32_t, 20> acceleration_average = RollingAverage<int32_t, 20>();
 
         uint32_t prev_rpm = tach->get_rpm();
-        unsigned long end_time = millis() + 2000;
-        while(millis() < end_time || roc_average.get_average() < 20) {
+        unsigned long end_time = millis() + 10000;
+        while(millis() < end_time || acceleration_average.get_average() < 5) {
             delay(5);
-            roc_average.update((int32_t) prev_rpm - (int32_t) tach->get_rpm());
+            acceleration_average.update((int32_t) prev_rpm - (int32_t) tach->get_rpm());
             prev_rpm = tach->get_rpm();
 
             set_voltage(voltage);
@@ -37,7 +37,7 @@ void tune_ff(Tachometer *tach, void (*set_voltage)(double), double max_voltage, 
     }
 
     Serial.println("Computing regression");
-    LinearRegression regression((double**) &data, VOLTAGE_STEPS);
+    LinearRegression regression(data, VOLTAGE_STEPS);
 
     Serial.print("Model: V = ");
     Serial.print(regression.getSlope());

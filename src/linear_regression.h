@@ -17,7 +17,7 @@ class LinearRegression {
          * 
          * @param data a 2D array of x and y coordinates
          */
-        LinearRegression (double** data, uint32_t len) {
+        LinearRegression (double data[][2], uint32_t len) {
             // int n = data.length;
 
             // first pass

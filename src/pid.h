@@ -5,10 +5,17 @@
 
 class PIDController {
     public:
-        PIDController(double kP, double kI, double kD) {
+        PIDController() {}
+
+        PIDController(const PIDController& p) {
+            *this = p;
+        }
+
+        PIDController(double kP, double kI, double kD, double integralThreshold) {
             this->kP = kP;
             this->kI = kI;
             this->kD = kD;
+            this->integralThreshold = integralThreshold;
             this->time_of_last_update = micros();
         }
 
@@ -31,8 +38,10 @@ class PIDController {
             this->time_of_last_update = current_time;
 
             // Integrate the error
-            this->error_sum += error * (double) elapsed_time;
-
+            if (abs(error) <= this->integralThreshold) {
+                this->error_sum += error * (double) elapsed_time;
+            }
+            
             double delta_error = previous_error - error;
             previous_error = error;
 
@@ -47,6 +56,7 @@ class PIDController {
         double kP;
         double kI;
         double kD;
+        double integralThreshold;
 
         unsigned long time_of_last_update;
         double previous_error;
