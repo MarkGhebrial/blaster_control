@@ -52,6 +52,10 @@ class PIDController {
             return this->output;
         }
 
+        double get_setpoint() {
+            return setpoint;
+        }
+
     private:
         double kP;
         double kI;

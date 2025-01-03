@@ -76,10 +76,12 @@ class Wheel {
             //     this->set_voltage(this->target_voltage);
             // }
 
+            double feedforward;
             switch (this->mode) {
                 case WheelMode::PID_MODE:
                     this->pid.update((double) tach.get_rpm());
-                    target_voltage = pid.get();
+                    feedforward = 0.00306967 * pow(EULER, pid.get_setpoint()*0.000206605) + 1.42467;
+                    target_voltage = pid.get() + feedforward;
                 case WheelMode::VOLTAGE_MODE:
                     this->set_voltage_dont_change_state(this->target_voltage);
                     break;

@@ -56,7 +56,7 @@ void loop() {
     Serial.println(battery_voltage());
 
     if(digitalRead(REV_SWITCH_PIN)) {
-        wheel_a.set_rpm(10000);
+        wheel_a.set_rpm(37000);
         wheel_b.set_voltage(0);
     }
     else {

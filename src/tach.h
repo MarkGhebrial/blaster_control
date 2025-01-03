@@ -21,7 +21,7 @@ class Tachometer {
             this->edges_per_revolution = edges_per_revolution;
             time_of_last_interrupt = 0;
 
-            this->filter = RollingAverage<uint32_t, 2>();
+            this->filter = RollingAverage<uint32_t, 4>();
         }
 
         void handle_interrupt() {
@@ -62,7 +62,7 @@ class Tachometer {
         unsigned long time_of_last_interrupt;
         uint32_t edges_per_revolution;
         uint32_t rpm;
-        RollingAverage<uint32_t, 2> filter;
+        RollingAverage<uint32_t, 4> filter;
 };
 
 #endif
