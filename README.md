@@ -13,14 +13,14 @@ See [the linked repository](https://github.com/MarkGhebrial/nerf-tachometer-boar
 
 ## What about the electronics?
 - An Adafruit ItsyBitsy M0 express is the brains of the whole operation.
-- Each motor is controlled by a dedicated MOSFET. A dual channel MOSFET driver allows the MCU to safely control the MOSFETS.
+- Each motor is controlled by a dedicated MOSFET. A dual channel MOSFET driver allows the MCU to independently control the MOSFETS.
 - A voltage divider allows the microcontroller to measure the voltage of the battery.
-- I designed a PCB that makes it easier to wire up the IR sensors.
+- I designed a PCB that makes it easier to wire up the IR sensors (see the top of this README for the link to that repository).
 - Battery: currently a 3s lipo. Voltage regulators are capable of 4s.
 
 ## What about the hardware?
 - The pusher, grip, and cage of the protean are unchanged. I modified the magwell to make more space underneath the motors. I designed a new stock that has space for both the battery and the electronics. I modified the reciever cover to add mounts for the IR sensor PCB.
-- Motors: Custom 42k rpm motors. Courtesy of tinkershot 
+- Motors: Custom 42k rpm brushed motors. Courtesy of tinkershot 
 - Wheels: 1st gen manshees from Roboman Automation
 
 ## Planned features
