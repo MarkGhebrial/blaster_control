@@ -10,11 +10,13 @@
 #define WHEEL_A_PIN 11
 #define WHEEL_B_PIN 9
 
+#define BUZZER_PIN 5
+
 #define ADC_RESOLUTION 12
 #define PWM_RESOLUTION 12
 
 #define WHEEL_KP 0.002
 #define WHEEL_KI 0.000000005
-#define WhEEL_KD 0.003
-// TODO: 10000 rpm is a temporary fix to account for innacurate feedforward on motor b. Set this back to 4000 when that issue is resolved.
+#define WhEEL_KD 0.005
+// TODO: 10000 rpm is a temporary fix to account for inaccurate feedforward on motor b. Set this back to 4000 when that issue is resolved.
 #define WHEEL_INTEGRAL_THRESHOLD 10000

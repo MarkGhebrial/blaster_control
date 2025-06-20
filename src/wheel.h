@@ -65,6 +65,13 @@ class Wheel {
             this->pid.set(rpm);
         }
 
+        /// @brief Returns true if the wheel is in PID control mode and its speed is within the rpm setpoint plus or minus the tolerance.
+        /// @param tolerance
+        /// @return If the wheel speed is within the tolerance.
+        bool is_up_to_speed(uint32_t tolerance = 500) {
+            return this->mode == WheelMode::PID_MODE && abs(this->tach.get_rpm() - this->pid.get_setpoint()) < tolerance;
+        }
+
         /**
          * This function must be called at a regular interval.
          */
