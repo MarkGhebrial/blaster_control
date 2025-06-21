@@ -5,10 +5,10 @@
 
 #include "config.h"
 
-#include "util.h"
 #include "batt.h"
-#include "tach.h"
 #include "pid.h"
+#include "tach.h"
+#include "util.h"
 
 enum WheelMode {
     PWM_MODE,
@@ -77,18 +77,13 @@ class Wheel {
          */
         void update() {
             this->tach.update();
-            // if (this->in_voltage_mode) {
-            //     this->pid.update(tach.get_rpm());
-            //     this->target_voltage = pid.get();
-            //     this->set_voltage(this->target_voltage);
-            // }
 
-            double feedforward;
+            // double feedforward;
             switch (this->mode) {
                 case WheelMode::PID_MODE:
                     this->pid.update((double) tach.get_rpm());
-                    feedforward = 0.00306967 * pow(EULER, pid.get_setpoint()*0.000206605) + 1.42467;
-                    target_voltage = pid.get() + feedforward;
+                    // feedforward = 0.00306967 * pow(EULER, pid.get_setpoint()*0.000206605) + 1.42467;
+                    target_voltage = pid.get();
                 case WheelMode::VOLTAGE_MODE:
                     this->set_voltage_dont_change_state(this->target_voltage);
                     break;

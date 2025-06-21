@@ -2,15 +2,17 @@
 
 #include "config.h"
 
+#include "autotune.h"
 #include "rolling_average.h"
 #include "util.h"
 #include "tach.h"
-#include "pid.h"
 #include "feedforward.h"
+#include "pid.h"
 #include "wheel.h"
 
 Tachometer wheel_a_tach(EDGES_PER_REVOLUTION);
-PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
+ExponentialFeedForwardModel wheel_a_model(3.06967, 1.2295, 1.42467);
+PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD, &wheel_a_model);
 Wheel wheel_a(wheel_a_tach, wheel_a_pid, WHEEL_A_PIN, 12.0, false);
 
 Tachometer wheel_b_tach(EDGES_PER_REVOLUTION);
@@ -56,18 +58,18 @@ void setup() {
 
     // double kS, kV;
     // analogWrite(WHEEL_B_PIN, 255);
-    // if (digitalRead(REV_SWITCH_PIN)) {
-    Serial.println("Tuning wheel A");
-    tune_ff(&wheel_a, 11);
-    Serial.println("Tuning wheel B");
-    tune_ff(&wheel_b, 11);
-    analogWrite(WHEEL_A_PIN, 255);
-    while(!rev()) {
-        wheel_a.update();
-        wheel_b.update();
-        delay(5);
+    if (rev()) {
+        Serial.println("Tuning wheel A");
+        tune_ff(&wheel_a, 11);
+        Serial.println("Tuning wheel B");
+        tune_ff(&wheel_b, 11);
+        analogWrite(WHEEL_A_PIN, 255);
+        while(!rev()) {
+            wheel_a.update();
+            wheel_b.update();
+            delay(5);
+        }
     }
-    // }
 }
 
 void loop() {

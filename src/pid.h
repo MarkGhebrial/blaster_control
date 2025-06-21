@@ -3,6 +3,8 @@
 
 #include <Arduino.h>
 
+#include "feedforward.h"
+
 class PIDController {
     public:
         PIDController() {}
@@ -17,6 +19,10 @@ class PIDController {
             this->kD = kD;
             this->integralThreshold = integralThreshold;
             this->time_of_last_update = micros();
+        }
+
+        PIDController(double kP, double kI, double kD, double integralThreshold, FeedForwardModel* model) : PIDController(kP, kI, kD, integralThreshold) {
+            this->model = model;
         }
 
         void reset() {
@@ -49,14 +55,18 @@ class PIDController {
         }
 
         double get() {
-            return this->output;
+            if (this->model) {
+                return this->output + model->compute(this->setpoint);
+            } else {
+                return this->output;
+            }
         }
 
         double get_setpoint() {
             return setpoint;
         }
 
-    private:
+    protected:
         double kP;
         double kI;
         double kD;
@@ -68,6 +78,9 @@ class PIDController {
 
         double setpoint = 0;
         double output = 0;
+
+        // A pointer to a feed forward model
+        FeedForwardModel* model = nullptr;
 };
 
 #endif
