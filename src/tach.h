@@ -19,7 +19,7 @@ class Tachometer {
 
         Tachometer(uint32_t edges_per_revolution) {
             this->edges_per_revolution = edges_per_revolution;
-            time_of_last_interrupt = 0;
+            time_of_last_sample = 0;
 
             this->filter = RollingAverage<uint32_t, 4>();
         }
@@ -27,26 +27,40 @@ class Tachometer {
         void handle_interrupt() {
             // Compute the time since the last interrupt
             unsigned long current_time = micros();
-            unsigned long elapsed_micros = micros() - time_of_last_interrupt;
-            time_of_last_interrupt = current_time;
+            unsigned long elapsed_micros = micros() - time_of_last_sample;
+            // time_of_last_sample = current_time;
 
-            // Convert microseconds per edge to revolutions per minute
-            double new_rpm = (1 / (double) elapsed_micros) *
-                        (1.0 / (double) this->edges_per_revolution) *
-                        (60000000); // 60000000 is the number of microseconds in a minute
-
-            // Ignore the new reading if the difference from the last one is absurdly large
-            if (abs(new_rpm - this->rpm) > 50000) {
-                return;
+            if (elapsed_micros <= 1500) {
+                edges_per_sample++;
+            }
+            if (edges_per_sample > 1 && elapsed_micros >= 2000) {
+                edges_per_sample--;
             }
 
-            // Update the rolling average filter
-            filter.update(new_rpm);
-            this->rpm = filter.get_average();
+            edges_since_last_sample++;
+            if (edges_since_last_sample >= edges_per_sample) {
+                
+                double new_rpm = (1 / (double) elapsed_micros) *
+                    (edges_since_last_sample) * 
+                    (1.0 / (double) this->edges_per_revolution) *
+                    (60000000); // 60000000 is the number of microseconds in a minute
+                
+                time_of_last_sample = current_time;
+                edges_since_last_sample = 0;
+
+                // Ignore the new reading if the difference from the last one is absurdly large
+                if (abs(new_rpm - this->rpm) > 50000) {
+                    return;
+                }
+
+                // Update the rolling average filter
+                filter.update(new_rpm);
+                this->rpm = filter.get_average();
+            } 
         }
 
         void update() {
-            unsigned long elapsed_micros = micros() - time_of_last_interrupt;
+            unsigned long elapsed_micros = micros() - time_of_last_sample;
 
             // If no edge has been detected for more than half a second, set the rpm to zero
             if (elapsed_micros > 500000) {
@@ -59,10 +73,21 @@ class Tachometer {
         }
 
     private:
-        unsigned long time_of_last_interrupt;
+        unsigned long time_of_last_sample;
         uint32_t edges_per_revolution;
         uint32_t rpm;
         RollingAverage<uint32_t, 4> filter;
+
+        // Higher RPMs mean less elapsed time between sensor readings. Since the timer is
+        // only accurate to within a microsecond, the rpm resolution decreases significantly
+        // as speeds increase. (+- 200ish RPM at 40k RPM). To reduce this effect, we can
+        // increase the amount of time between readings by skipping some sensor edges.
+        //
+        // The RPM reading is only updated when edges_since_last_sample >= edges_per_sample.
+        // edges_per_sample is dynamically updated based on the time between samples. That
+        // ensures that the RPM reading is accurate to within 30ish RPM.
+        uint32_t edges_per_sample = 1;
+        uint32_t edges_since_last_sample = 0;
 };
 
 #endif

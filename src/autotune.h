@@ -18,8 +18,11 @@ void tune_ff(Wheel* wheel, double max_voltage) {
         // Loop for 3 seconds or until acceleration has stabilized, whichever comes later
         while(millis() < end_time || abs(acceleration_average.get_average()) < 2) {
             delay(5);
-            acceleration_average.update((int32_t) prev_rpm - (int32_t) wheel->tach.get_rpm());
+            acceleration_average.update((int32_t) wheel->tach.get_rpm() - (int32_t) prev_rpm );
             prev_rpm = wheel->tach.get_rpm();
+
+            // Serial.print("Average acceleration: ");
+            // Serial.println(acceleration_average.get_average());
             
             // voltage_average.update(battery_voltage());
             // if (voltage_average.get_average() < voltage) {
@@ -43,7 +46,7 @@ void tune_ff(Wheel* wheel, double max_voltage) {
 
     // Print the data as a csv
     for (auto point : data) {
-        Serial.print(point[0]);
+        Serial.print(point[1]);
         Serial.print(',');
         Serial.println(point[0]);
     }
