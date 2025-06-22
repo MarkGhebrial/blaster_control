@@ -11,11 +11,12 @@
 #include "wheel.h"
 
 Tachometer wheel_a_tach(EDGES_PER_REVOLUTION);
-ExponentialFeedForwardModel wheel_a_model(3.06967, 1.2295, 1.42467);
+ExponentialFeedForwardModel wheel_a_model(97.63194, 1.10345, 0.303797);
 PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD, &wheel_a_model);
 Wheel wheel_a(wheel_a_tach, wheel_a_pid, WHEEL_A_PIN, 12.0, false);
 
 Tachometer wheel_b_tach(EDGES_PER_REVOLUTION);
+ExponentialFeedForwardModel wheel_b_model(16.36027, 1.11323, 1.65077);
 PIDController wheel_b_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
 Wheel wheel_b(wheel_b_tach, wheel_b_pid, WHEEL_B_PIN, 12.0, false);
 
@@ -59,12 +60,13 @@ void setup() {
     // double kS, kV;
     // analogWrite(WHEEL_B_PIN, 255);
     if (rev()) {
-        Serial.println("Tuning wheel A");
-        tune_ff(&wheel_a, 11);
+        // Serial.println("Tuning wheel A");
+        // tune_ff(&wheel_a, 11);
         Serial.println("Tuning wheel B");
         tune_ff(&wheel_b, 11);
-        analogWrite(WHEEL_A_PIN, 255);
+        // analogWrite(WHEEL_A_PIN, 255);
         while(!rev()) {
+            // TODO: We probably don't need to update the wheels in this loop
             wheel_a.update();
             wheel_b.update();
             delay(5);

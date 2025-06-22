@@ -21,7 +21,7 @@ class Tachometer {
             this->edges_per_revolution = edges_per_revolution;
             time_of_last_sample = 0;
 
-            this->filter = RollingAverage<uint32_t, 4>();
+            this->filter = RollingAverage<uint32_t, 20>();
         }
 
         void handle_interrupt() {
@@ -30,12 +30,12 @@ class Tachometer {
             unsigned long elapsed_micros = micros() - time_of_last_sample;
             // time_of_last_sample = current_time;
 
-            if (elapsed_micros <= 1500) {
-                edges_per_sample++;
-            }
-            if (edges_per_sample > 1 && elapsed_micros >= 2000) {
-                edges_per_sample--;
-            }
+            // if (elapsed_micros <= 1500) {
+            //     edges_per_sample++;
+            // }
+            // if (edges_per_sample > 1 && elapsed_micros >= 2000) {
+            //     edges_per_sample--;
+            // }
 
             edges_since_last_sample++;
             if (edges_since_last_sample >= edges_per_sample) {
@@ -76,7 +76,7 @@ class Tachometer {
         unsigned long time_of_last_sample;
         uint32_t edges_per_revolution;
         uint32_t rpm;
-        RollingAverage<uint32_t, 4> filter;
+        RollingAverage<uint32_t, 20> filter;
 
         // Higher RPMs mean less elapsed time between sensor readings. Since the timer is
         // only accurate to within a microsecond, the rpm resolution decreases significantly
@@ -86,6 +86,9 @@ class Tachometer {
         // The RPM reading is only updated when edges_since_last_sample >= edges_per_sample.
         // edges_per_sample is dynamically updated based on the time between samples. That
         // ensures that the RPM reading is accurate to within 30ish RPM.
+        //
+        // TODO: All this is currently broken and makes the RPM readings much less consistent.
+        // For now, edges_per_sample is fixed at 1.
         uint32_t edges_per_sample = 1;
         uint32_t edges_since_last_sample = 0;
 };

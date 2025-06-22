@@ -18,6 +18,5 @@
 
 #define WHEEL_KP 0.002
 #define WHEEL_KI 0.000000005
-#define WhEEL_KD 0.005
-// TODO: 10000 rpm is a temporary fix to account for inaccurate feedforward on motor b. Set this back to 4000 when that issue is resolved.
-#define WHEEL_INTEGRAL_THRESHOLD 10000
+#define WhEEL_KD 0.0075
+#define WHEEL_INTEGRAL_THRESHOLD 4000
