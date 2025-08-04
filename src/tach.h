@@ -21,7 +21,7 @@ class Tachometer {
             this->edges_per_revolution = edges_per_revolution;
             time_of_last_sample = 0;
 
-            this->filter = RollingAverage<uint32_t, 20>();
+            this->filter = RollingAverage<uint32_t, 10>();
         }
 
         void handle_interrupt() {
@@ -76,7 +76,7 @@ class Tachometer {
         unsigned long time_of_last_sample;
         uint32_t edges_per_revolution;
         uint32_t rpm;
-        RollingAverage<uint32_t, 20> filter;
+        RollingAverage<uint32_t, 10> filter;
 
         // Higher RPMs mean less elapsed time between sensor readings. Since the timer is
         // only accurate to within a microsecond, the rpm resolution decreases significantly

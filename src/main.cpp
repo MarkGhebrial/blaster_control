@@ -91,8 +91,8 @@ void loop() {
 
 
     if(rev()) {
-        wheel_a.set_rpm(42000);
-        wheel_b.set_rpm(42000);
+        wheel_a.set_rpm(35000);
+        wheel_b.set_rpm(35000);
     }
     else {
         wheel_a.set_voltage(0);

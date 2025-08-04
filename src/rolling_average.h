@@ -23,11 +23,22 @@ class RollingAverage {
         }
 
         T get_average() {
+            T min_outlier = this->buffer[0];
+            T max_outlier = this->buffer[0];
+
             T sum = 0;
             for (int i = 0; i < N; i++) {
+                // Reject min and max outliers
+                // TODO: Make outlier rejection optional
+                if (this->buffer[i] < min_outlier) {
+                    min_outlier = this->buffer[i];
+                }
+                if (this->buffer[i] > max_outlier) {
+                    max_outlier = this->buffer[i];
+                }
                 sum += this->buffer[i];
             }
-            return sum / N;
+            return (sum - min_outlier - max_outlier) / (N - 2);
         }
 
     private:
