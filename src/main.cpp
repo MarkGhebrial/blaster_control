@@ -11,13 +11,13 @@
 #include "wheel.h"
 
 Tachometer wheel_a_tach(EDGES_PER_REVOLUTION);
-ExponentialFeedForwardModel wheel_a_model(97.63194, 1.10345, 0.303797);
-PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD, &wheel_a_model);
+ExponentialFeedForwardModel wheel_a_model(0.00309105, 1.39588, 2.20258);
+PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WHEEL_KD, WHEEL_INTEGRAL_THRESHOLD, &wheel_a_model);
 Wheel wheel_a(wheel_a_tach, wheel_a_pid, WHEEL_A_PIN, 12.0, false);
 
 Tachometer wheel_b_tach(EDGES_PER_REVOLUTION);
-ExponentialFeedForwardModel wheel_b_model(16.36027, 1.11323, 1.65077);
-PIDController wheel_b_pid(WHEEL_KP, WHEEL_KI, WhEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
+ExponentialFeedForwardModel wheel_b_model(0.00309105, 1.39588, 2.20258);
+PIDController wheel_b_pid(WHEEL_KP, WHEEL_KI, WHEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
 Wheel wheel_b(wheel_b_tach, wheel_b_pid, WHEEL_B_PIN, 12.0, false);
 
 bool was_up_to_speed = false;
