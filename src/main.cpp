@@ -76,11 +76,15 @@ void loop() {
     Serial.print(wheel_a.tach.get_rpm());
     Serial.print(", Wheel a pid: ");
     Serial.print(wheel_a.pid.get());
+    Serial.print(", Wheel a IR: ");
+    Serial.print(digitalRead(TACH_A_PIN));
 
     Serial.print(", Wheel b RPM: ");
     Serial.print(wheel_b.tach.get_rpm());
     Serial.print(", Wheel b pid: ");
     Serial.print(wheel_b.pid.get());
+    Serial.print(", Wheel b IR: ");
+    Serial.print(digitalRead(TACH_B_PIN));
 
     Serial.print(", Voltage: ");
     Serial.println(battery_voltage());
