@@ -101,7 +101,7 @@ void loop() {
 
     if (is_battery_low(num_cells)) {
         // If the battery is low, continuously sound the buzzer
-        tone(BUZZER_PIN, 3000, 10);
+        // tone(BUZZER_PIN, 3000, 10);
     } else {
         // Check if the wheels have reached their target speed. If so, briefly sound the buzzer
         bool wheels_up_to_speed = wheel_a.is_up_to_speed(2000) && wheel_b.is_up_to_speed(2000);
