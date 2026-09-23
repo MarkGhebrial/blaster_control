@@ -7,7 +7,7 @@
 #include "config.h"
 
 double battery_voltage() {
-    return double_map((double) analogRead(VOLTAGE_DIVIDER_PIN), 0.0, 4096.0, 0, 3.3) * (1.0/VOLTAGE_DIVIDER_RATIO);
+    return double_map((double) analogRead(config::VOLTAGE_DIVIDER_PIN), 0.0, 4096.0, 0, 3.3) * (1.0/config::VOLTAGE_DIVIDER_RATIO);
 }
 
 /**

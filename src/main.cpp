@@ -10,15 +10,15 @@
 #include "pid.h"
 #include "wheel.h"
 
-Tachometer wheel_a_tach(EDGES_PER_REVOLUTION);
+Tachometer wheel_a_tach(config::EDGES_PER_REVOLUTION);
 ExponentialFeedForwardModel wheel_a_model(0.00309105, 1.39588, 2.20258);
-PIDController wheel_a_pid(WHEEL_KP, WHEEL_KI, WHEEL_KD, WHEEL_INTEGRAL_THRESHOLD, &wheel_a_model);
-Wheel wheel_a(wheel_a_tach, wheel_a_pid, WHEEL_A_PIN, 12.0, false);
+PIDController wheel_a_pid(config::WHEEL_KP, config::WHEEL_KI, config::WHEEL_KD, config::WHEEL_INTEGRAL_THRESHOLD, &wheel_a_model);
+Wheel wheel_a(wheel_a_tach, wheel_a_pid, config::WHEEL_A_PIN, 12.0, false);
 
-Tachometer wheel_b_tach(EDGES_PER_REVOLUTION);
+Tachometer wheel_b_tach(config::EDGES_PER_REVOLUTION);
 ExponentialFeedForwardModel wheel_b_model(0.00309105, 1.39588, 2.20258);
-PIDController wheel_b_pid(WHEEL_KP, WHEEL_KI, WHEEL_KD, WHEEL_INTEGRAL_THRESHOLD);
-Wheel wheel_b(wheel_b_tach, wheel_b_pid, WHEEL_B_PIN, 12.0, false);
+PIDController wheel_b_pid(config::WHEEL_KP, config::WHEEL_KI, config::WHEEL_KD, config::WHEEL_INTEGRAL_THRESHOLD);
+Wheel wheel_b(wheel_b_tach, wheel_b_pid, config::WHEEL_B_PIN, 12.0, false);
 
 bool was_up_to_speed = false;
 int num_cells;
@@ -34,22 +34,22 @@ void tach_b_interrupt() {
  * Returns true if the rev trigger is pressed.
  */
 bool rev() {
-    return REV_SWITCH_INVERTED ? !digitalRead(REV_SWITCH_PIN) : digitalRead(REV_SWITCH_PIN);
+    return config::REV_SWITCH_INVERTED ? !digitalRead(config::REV_SWITCH_PIN) : digitalRead(config::REV_SWITCH_PIN);
 }
 
 void setup() {
-    pinMode(REV_SWITCH_PIN, INPUT_PULLUP);
-    pinMode(TACH_A_PIN, INPUT_PULLUP);
-    pinMode(TACH_B_PIN, INPUT_PULLUP);
+    pinMode(config::REV_SWITCH_PIN, INPUT_PULLUP);
+    pinMode(config::TACH_A_PIN, INPUT_PULLUP);
+    pinMode(config::TACH_B_PIN, INPUT_PULLUP);
 
-    analogReadResolution(ADC_RESOLUTION);
+    analogReadResolution(config::_ADC_RESOLUTION);
     // analogWriteResolution(PWM_RESOLUTION);
 
     Serial.begin(9600);
 
     // Setup tachometer interrupts
-    attachInterrupt(digitalPinToInterrupt(TACH_A_PIN), tach_a_interrupt, CHANGE);
-    attachInterrupt(digitalPinToInterrupt(TACH_B_PIN), tach_b_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(config::TACH_A_PIN), tach_a_interrupt, CHANGE);
+    attachInterrupt(digitalPinToInterrupt(config::TACH_B_PIN), tach_b_interrupt, CHANGE);
 
     num_cells = cell_count();
 
@@ -77,14 +77,14 @@ void loop() {
     Serial.print(", Wheel a pid: ");
     Serial.print(wheel_a.pid.get());
     Serial.print(", Wheel a IR: ");
-    Serial.print(digitalRead(TACH_A_PIN));
+    Serial.print(digitalRead(config::TACH_A_PIN));
 
     Serial.print(", Wheel b RPM: ");
     Serial.print(wheel_b.tach.get_rpm());
     Serial.print(", Wheel b pid: ");
     Serial.print(wheel_b.pid.get());
     Serial.print(", Wheel b IR: ");
-    Serial.print(digitalRead(TACH_B_PIN));
+    Serial.print(digitalRead(config::TACH_B_PIN));
 
     Serial.print(", Voltage: ");
     Serial.println(battery_voltage());
@@ -107,7 +107,7 @@ void loop() {
         bool wheels_up_to_speed = wheel_a.is_up_to_speed(2000) && wheel_b.is_up_to_speed(2000);
         if (!was_up_to_speed && wheels_up_to_speed) { // On a rising edge
             Serial.println("BEEPING");
-            tone(BUZZER_PIN, 2000, 50);
+            tone(config::BUZZER_PIN, 2000, 50);
         }
         was_up_to_speed = wheels_up_to_speed;
     }
