@@ -38,10 +38,6 @@ bool rev() {
 }
 
 void setup() {
-    // TODO: On startup, get battery voltage and use it to calculate the number
-    // of cells. Then, while running, use the number of cells to sound an alarm
-    // when the voltage drops too low;
-
     pinMode(REV_SWITCH_PIN, INPUT_PULLUP);
     pinMode(TACH_A_PIN, INPUT_PULLUP);
     pinMode(TACH_B_PIN, INPUT_PULLUP);
