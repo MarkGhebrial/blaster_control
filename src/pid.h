@@ -47,6 +47,9 @@ class PIDController {
             if (abs(error) <= this->integralThreshold) {
                 this->error_sum += error * (double) elapsed_time;
             }
+            else {
+                this->error_sum = 0;
+            }
             
             double delta_error = previous_error - error;
             previous_error = error;
