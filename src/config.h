@@ -5,6 +5,9 @@ namespace config {
     constexpr int REV_SWITCH_PIN = 12;
     constexpr bool REV_SWITCH_INVERTED = true;
 
+    constexpr int IDLE_SWITCH_PIN = A1;
+    constexpr bool IDLE_SWITCH_INVERTED = false;
+
     constexpr int VOLTAGE_DIVIDER_PIN = A2;
     constexpr double VOLTAGE_DIVIDER_RATIO = 22.0 / 122.0;
 

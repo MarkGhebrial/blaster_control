@@ -4,6 +4,7 @@
 #include "config.h"
 
 #include "autotune.h"
+#include "edgedetector.h"
 #include "rolling_average.h"
 #include "util.h"
 #include "tach.h"
@@ -35,8 +36,13 @@ bool rev() {
     return config::REV_SWITCH_INVERTED ? !digitalRead(config::REV_SWITCH_PIN) : digitalRead(config::REV_SWITCH_PIN);
 }
 
+bool read_idle_switch() {
+    return config::IDLE_SWITCH_INVERTED ? !digitalRead(config::IDLE_SWITCH_PIN) : digitalRead(config::IDLE_SWITCH_PIN);
+}
+
 void setup() {
     pinMode(config::REV_SWITCH_PIN, INPUT_PULLUP);
+    pinMode(config::IDLE_SWITCH_PIN, INPUT_PULLUP);
     pinMode(config::TACH_A_PIN, INPUT_PULLUP);
     pinMode(config::TACH_B_PIN, INPUT_PULLUP);
 
@@ -49,23 +55,31 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(config::TACH_A_PIN), tach_a_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(config::TACH_B_PIN), tach_b_interrupt, CHANGE);
 
-    if (rev()) {
-        // Serial.println("Tuning wheel A");
-        // tune_ff(&wheel_a, 11);
-        Serial.println("Tuning wheel B");
-        tune_ff(&wheel_b, 11);
-        // analogWrite(WHEEL_A_PIN, 255);
-        while(!rev()) {
-            // TODO: We probably don't need to update the wheels in this loop
-            wheel_a.update();
-            wheel_b.update();
-            delay(5);
-        }
-    }
+    // if (rev()) {
+    //     // Serial.println("Tuning wheel A");
+    //     // tune_ff(&wheel_a, 11);
+    //     Serial.println("Tuning wheel B");
+    //     tune_ff(&wheel_b, 11);
+    //     // analogWrite(WHEEL_A_PIN, 255);
+    //     while(!rev()) {
+    //         // TODO: We probably don't need to update the wheels in this loop
+    //         wheel_a.update();
+    //         wheel_b.update();
+    //         delay(5);
+    //     }
+    // }
+
+    EdgeDetector idle_switch_edge_detector;
 
     int num_cells = cell_count();
     bool was_up_to_speed = false;
+    bool idle_enabled = false;
     while (true) {
+        idle_switch_edge_detector.update(read_idle_switch());
+        if (idle_switch_edge_detector.fallen()) {
+            idle_enabled = !idle_enabled;
+        }
+
         // Print debug info
         Serial.print("Wheel a RPM: ");
         Serial.print(wheel_a.tach.get_rpm());
@@ -81,6 +95,9 @@ void setup() {
         Serial.print(", Wheel b IR: ");
         Serial.print(digitalRead(config::TACH_B_PIN));
 
+        Serial.print(", Idle enabled?: ");
+        Serial.print(idle_enabled);
+        
         Serial.print(", Voltage: ");
         Serial.println(battery_voltage());
 
@@ -88,6 +105,10 @@ void setup() {
         if(rev()) {
             wheel_a.set_rpm(35000);
             wheel_b.set_rpm(35000);
+        }
+        else if (idle_enabled) {
+            wheel_a.set_rpm(26000);
+            wheel_b.set_rpm(26000);
         }
         else {
             wheel_a.set_voltage(0);
@@ -100,7 +121,7 @@ void setup() {
         } else {
             // Check if the wheels have reached their target speed. If so, briefly sound the buzzer
             bool wheels_up_to_speed = wheel_a.is_up_to_speed(2000) && wheel_b.is_up_to_speed(2000);
-            if (!was_up_to_speed && wheels_up_to_speed) { // On a rising edge
+            if (rev() && !was_up_to_speed && wheels_up_to_speed) { // On a rising edge
                 Serial.println("BEEPING");
                 tone(config::BUZZER_PIN, 2000, 50);
             }
