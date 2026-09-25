@@ -21,9 +21,6 @@ ExponentialFeedForwardModel wheel_b_model(0.00309105, 1.39588, 2.20258);
 PIDController wheel_b_pid(config::WHEEL_KP, config::WHEEL_KI, config::WHEEL_KD, config::WHEEL_INTEGRAL_THRESHOLD);
 Wheel wheel_b(std::move(wheel_b_tach), std::move(wheel_b_pid), config::WHEEL_B_PIN, 12.0, false);
 
-bool was_up_to_speed = false;
-int num_cells;
-
 void tach_a_interrupt() {
     wheel_a.tach.handle_interrupt();
 }
@@ -52,8 +49,6 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(config::TACH_A_PIN), tach_a_interrupt, CHANGE);
     attachInterrupt(digitalPinToInterrupt(config::TACH_B_PIN), tach_b_interrupt, CHANGE);
 
-    num_cells = cell_count();
-
     if (rev()) {
         // Serial.println("Tuning wheel A");
         // tune_ff(&wheel_a, 11);
@@ -67,52 +62,58 @@ void setup() {
             delay(5);
         }
     }
+
+    int num_cells = cell_count();
+    bool was_up_to_speed = false;
+    while (true) {
+        // Print debug info
+        Serial.print("Wheel a RPM: ");
+        Serial.print(wheel_a.tach.get_rpm());
+        Serial.print(", Wheel a pid: ");
+        Serial.print(wheel_a.pid.get());
+        Serial.print(", Wheel a IR: ");
+        Serial.print(digitalRead(config::TACH_A_PIN));
+
+        Serial.print(", Wheel b RPM: ");
+        Serial.print(wheel_b.tach.get_rpm());
+        Serial.print(", Wheel b pid: ");
+        Serial.print(wheel_b.pid.get());
+        Serial.print(", Wheel b IR: ");
+        Serial.print(digitalRead(config::TACH_B_PIN));
+
+        Serial.print(", Voltage: ");
+        Serial.println(battery_voltage());
+
+
+        if(rev()) {
+            wheel_a.set_rpm(35000);
+            wheel_b.set_rpm(35000);
+        }
+        else {
+            wheel_a.set_voltage(0);
+            wheel_b.set_voltage(0);
+        }
+
+        if (is_battery_low(num_cells)) {
+            // If the battery is low, continuously sound the buzzer
+            // tone(BUZZER_PIN, 3000, 10);
+        } else {
+            // Check if the wheels have reached their target speed. If so, briefly sound the buzzer
+            bool wheels_up_to_speed = wheel_a.is_up_to_speed(2000) && wheel_b.is_up_to_speed(2000);
+            if (!was_up_to_speed && wheels_up_to_speed) { // On a rising edge
+                Serial.println("BEEPING");
+                tone(config::BUZZER_PIN, 2000, 50);
+            }
+            was_up_to_speed = wheels_up_to_speed;
+        }
+
+        wheel_a.update();
+        wheel_b.update();
+
+        delay(5);
+    }
 }
 
+// The main loop is in setup() so we don't need global variables to persist data between loop runs
 void loop() {
-    // Print debug info
-    Serial.print("Wheel a RPM: ");
-    Serial.print(wheel_a.tach.get_rpm());
-    Serial.print(", Wheel a pid: ");
-    Serial.print(wheel_a.pid.get());
-    Serial.print(", Wheel a IR: ");
-    Serial.print(digitalRead(config::TACH_A_PIN));
-
-    Serial.print(", Wheel b RPM: ");
-    Serial.print(wheel_b.tach.get_rpm());
-    Serial.print(", Wheel b pid: ");
-    Serial.print(wheel_b.pid.get());
-    Serial.print(", Wheel b IR: ");
-    Serial.print(digitalRead(config::TACH_B_PIN));
-
-    Serial.print(", Voltage: ");
-    Serial.println(battery_voltage());
-
-
-    if(rev()) {
-        wheel_a.set_rpm(35000);
-        wheel_b.set_rpm(35000);
-    }
-    else {
-        wheel_a.set_voltage(0);
-        wheel_b.set_voltage(0);
-    }
-
-    if (is_battery_low(num_cells)) {
-        // If the battery is low, continuously sound the buzzer
-        // tone(BUZZER_PIN, 3000, 10);
-    } else {
-        // Check if the wheels have reached their target speed. If so, briefly sound the buzzer
-        bool wheels_up_to_speed = wheel_a.is_up_to_speed(2000) && wheel_b.is_up_to_speed(2000);
-        if (!was_up_to_speed && wheels_up_to_speed) { // On a rising edge
-            Serial.println("BEEPING");
-            tone(config::BUZZER_PIN, 2000, 50);
-        }
-        was_up_to_speed = wheels_up_to_speed;
-    }
-
-    wheel_a.update();
-    wheel_b.update();
-
-    delay(5);
 }
