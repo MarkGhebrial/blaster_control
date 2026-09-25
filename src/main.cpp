@@ -53,8 +53,6 @@ void setup() {
 
     num_cells = cell_count();
 
-    // double kS, kV;
-    // analogWrite(WHEEL_B_PIN, 255);
     if (rev()) {
         // Serial.println("Tuning wheel A");
         // tune_ff(&wheel_a, 11);
