@@ -10,7 +10,7 @@
 #include "tach.h"
 #include "util.h"
 
-enum WheelMode {
+enum class WheelMode {
     PWM_MODE,
     VOLTAGE_MODE,
     PID_MODE,
