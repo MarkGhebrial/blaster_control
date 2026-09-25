@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <utility>
 
 #include "config.h"
 
@@ -13,12 +14,12 @@
 Tachometer wheel_a_tach(config::EDGES_PER_REVOLUTION);
 ExponentialFeedForwardModel wheel_a_model(0.00309105, 1.39588, 2.20258);
 PIDController wheel_a_pid(config::WHEEL_KP, config::WHEEL_KI, config::WHEEL_KD, config::WHEEL_INTEGRAL_THRESHOLD, &wheel_a_model);
-Wheel wheel_a(wheel_a_tach, wheel_a_pid, config::WHEEL_A_PIN, 12.0, false);
+Wheel wheel_a(std::move(wheel_a_tach), std::move(wheel_a_pid), config::WHEEL_A_PIN, 12.0, false);
 
 Tachometer wheel_b_tach(config::EDGES_PER_REVOLUTION);
 ExponentialFeedForwardModel wheel_b_model(0.00309105, 1.39588, 2.20258);
 PIDController wheel_b_pid(config::WHEEL_KP, config::WHEEL_KI, config::WHEEL_KD, config::WHEEL_INTEGRAL_THRESHOLD);
-Wheel wheel_b(wheel_b_tach, wheel_b_pid, config::WHEEL_B_PIN, 12.0, false);
+Wheel wheel_b(std::move(wheel_b_tach), std::move(wheel_b_pid), config::WHEEL_B_PIN, 12.0, false);
 
 bool was_up_to_speed = false;
 int num_cells;
