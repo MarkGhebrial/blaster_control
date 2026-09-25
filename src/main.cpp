@@ -70,12 +70,14 @@ void setup() {
     // }
 
     EdgeDetector idle_switch_edge_detector;
+    EdgeDetector up_to_speed_edge_detector;
 
     int num_cells = cell_count();
-    bool was_up_to_speed = false;
     bool idle_enabled = false;
     while (true) {
         idle_switch_edge_detector.update(read_idle_switch());
+        up_to_speed_edge_detector.update(wheel_a.is_up_to_speed(2000) && wheel_b.is_up_to_speed(2000));
+
         if (idle_switch_edge_detector.fallen()) {
             idle_enabled = !idle_enabled;
         }
@@ -101,7 +103,7 @@ void setup() {
         Serial.print(", Voltage: ");
         Serial.println(battery_voltage());
 
-
+        // Rev logic
         if(rev()) {
             wheel_a.set_rpm(35000);
             wheel_b.set_rpm(35000);
@@ -115,17 +117,16 @@ void setup() {
             wheel_b.set_voltage(0);
         }
 
+        // Buzzer logic
         if (is_battery_low(num_cells)) {
             // If the battery is low, continuously sound the buzzer
             // tone(BUZZER_PIN, 3000, 10);
         } else {
             // Check if the wheels have reached their target speed. If so, briefly sound the buzzer
-            bool wheels_up_to_speed = wheel_a.is_up_to_speed(2000) && wheel_b.is_up_to_speed(2000);
-            if (rev() && !was_up_to_speed && wheels_up_to_speed) { // On a rising edge
+            if (rev() && up_to_speed_edge_detector.risen()) { // On a rising edge
                 Serial.println("BEEPING");
                 tone(config::BUZZER_PIN, 2000, 50);
             }
-            was_up_to_speed = wheels_up_to_speed;
         }
 
         wheel_a.update();
