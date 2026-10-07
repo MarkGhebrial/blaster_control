@@ -120,7 +120,7 @@ void setup() {
         // Buzzer logic
         if (is_battery_low(num_cells)) {
             // If the battery is low, continuously sound the buzzer
-            // tone(BUZZER_PIN, 3000, 10);
+            tone(config::BUZZER_PIN, 3000, 10);
         } else {
             // Check if the wheels have reached their target speed. If so, briefly sound the buzzer
             if (rev() && up_to_speed_edge_detector.risen()) { // On a rising edge
