@@ -26,7 +26,7 @@ namespace config {
 
     constexpr double WHEEL_KP = 0.0015;
     constexpr double WHEEL_KI = 0.00000001;
-    constexpr double WHEEL_KD = 0.0;
+    constexpr double WHEEL_KD = 0.001;
     constexpr int WHEEL_INTEGRAL_THRESHOLD = 6000;
 }
 
