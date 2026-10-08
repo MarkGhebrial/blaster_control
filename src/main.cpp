@@ -105,12 +105,18 @@ void setup() {
 
         // Rev logic
         if(rev()) {
-            wheel_a.set_rpm(35000);
-            wheel_b.set_rpm(35000);
+            wheel_a.set_pwm(255);
+            wheel_b.set_pwm(255);
+            
+            // wheel_a.set_rpm(32500);
+            // wheel_b.set_rpm(32500);
         }
         else if (idle_enabled) {
-            wheel_a.set_rpm(26000);
-            wheel_b.set_rpm(26000);
+            wheel_a.set_voltage(2.5);
+            wheel_b.set_voltage(2.5);
+
+            // wheel_a.set_rpm(26000);
+            // wheel_b.set_rpm(26000);
         }
         else {
             wheel_a.set_voltage(0);
